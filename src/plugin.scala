@@ -20,6 +20,8 @@ object Import {
     val naming = SettingKey[String => String]("angular-templates-naming", "Function to use to name templates based on their (relative) path [identity].")
     val outputHtml = SettingKey[Option[String]]("angular-templates-output-html", "Output an html file containing <script> text/ng-template tags [templates.html].")
     val outputJs = SettingKey[Option[String]]("angular-templates-output-js", "Output a js file that puts templates into $templateCache [templates.js].")
+    val headerJs = SettingKey[String]("angular-templates-file-header-js", "Header to be added to the js generated file")
+    val footerJs = SettingKey[String]("angular-templates-file-footer-js", "Footer to be added to the js generated file")
   }
 }
 
@@ -45,6 +47,8 @@ object AngularTemplates extends AutoPlugin {
     compressRemoveQuotes := false,
     compressPreserveLineBreaks := false,
     compressRemoveSurroundingSpaces := Nil,
+    headerJs := "",
+    footerJs := "",
     module := "module",
     naming := identity _,
     outputHtml := Some("templates.html"),
@@ -70,8 +74,8 @@ object AngularTemplates extends AutoPlugin {
         module.value,
         outputHtml.value.getOrElse(""),
         outputJs.value.getOrElse(""))
-      ++ maps.map { case (f, n) => f.getAbsolutePath + "\0" + n })
-        .mkString("\0"))
+        ++ maps.map { case (f, n) => f.getAbsolutePath + "\0" + n })
+      .mkString("\0"))
 
     implicit val opInputHasher = OpInputHasher[Unit](_ => hash)
 
@@ -118,17 +122,17 @@ object AngularTemplates extends AutoPlugin {
           }
           f
         }.toSeq ++
-        outputJs.value.map { o =>
-          val f = outDir / o
-          IO.writer(f, "", IO.defaultCharset) { w =>
-            w.write(module.value + ".run(['$templateCache',function(t){")
-            tpls.foreach { case (n, t) =>
-              w.write("t.put(" + JS.write(n) + "," + JS.write(t) + ");")
+          outputJs.value.map { o =>
+            val f = outDir / o
+            IO.writer(f, "", IO.defaultCharset) { w =>
+              w.write(headerJs.value + module.value + ".run(['$templateCache',function(t){")
+              tpls.foreach { case (n, t) =>
+                w.write("t.put(" + JS.write(n) + "," + JS.write(t) + ");")
+              }
+              w.write("}]);" + footerJs.value)
             }
-            w.write("}]);")
+            f
           }
-          f
-        }
 
         (Map(() -> OpSuccess(maps.map(_._1).toSet, outs.toSet)), ())
     }

@@ -20,7 +20,9 @@ You can control how the templates are generated using settings under AngularTemp
 The main ones are:
 
 * `outputJs`: File to generate containing loadable JavaScript templates, which can be directly sourced and loads all templates into the template cache, or `None` to disable generation.  Defaults to `templates.js`.  To use this you must also set `module` correctly.
-* `outputHtml`: File to generate containing includable HTML templates, embedded in `<script> text/ng-template` tags, or `None` to disable generation.  Defaults to `templates.html`.  
+* `headerJs` : Header to be added to the generated js file
+* `footerJs` : Footer to be added to the generated js file
+* `outputHtml`: File to generate containing includable HTML templates, embedded in `<script> text/ng-template` tags, or `None` to disable generation.  Defaults to `templates.html`.
 * `compress`: Compress HTML using [HtmlCompressor](https://code.google.com/p/htmlcompressor/#Using_HTML_Compressor_from_Java_API).  Most of the options listed there (such as `RemoveIntertagSpaces`) have equivalent settings here (`compressRemoveIntertagSpaces`).
 * `module`: Name of angular application module variable.  Defaults to "module".
 * `naming`: Function to use to map each template source file path to its template id.
